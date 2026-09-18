@@ -1,34 +1,36 @@
-name: Compilar Python a EXE
+name: Compilar main.py a EXE
 
 on:
   push:
     branches: [ main, master ]
-  workflow_dispatch:
+  pull_request:
+    branches: [ main, master ]
 
 jobs:
   build-windows:
     runs-on: windows-latest
 
     steps:
-    - name: 📁 Descargar código del repositorio
+    - name: Copiar repositorio
       uses: actions/checkout@v4
 
-    - name: 🐍 Configurar Python
+    - name: Configurar Python
       uses: actions/setup-python@v5
       with:
         python-version: '3.11'
+        cache: 'pip'
 
-    - name: 📦 Instalar dependencias y PyInstaller
+    - name: Instalar dependencias
       run: |
         python -m pip install --upgrade pip
-        pip install PySide6 psutil wmi pyinstaller
+        pip install pyinstaller PySide6 psutil
 
-    - name: ⚙️ Generar archivo Ejecutable (.exe)
+    - name: Compilar con PyInstaller
       run: |
-        pyinstaller --noconsole --onefile --name="MonitorHardware" main.py
+        pyinstaller --noconsole --onefile main.py
 
-    - name: 🚀 Subir el EXE como Artefacto
+    - name: Subir artefacto (EXE)
       uses: actions/upload-artifact@v4
       with:
-        name: MonitorHardware-EXE
+        name: ModernTempMonitor-EXE
         path: dist/*.exe
